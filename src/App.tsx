@@ -1,25 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
+// libs
+import React, { useCallback, useState, FC } from 'react'
+
+
+// component
+import { CenteredContainer } from "./components/CenteredContainer";
+import { StartupProgress } from "./StartupProgress";
+
+// others
+import {useFetchRandomFact} from "./useFetchRandomFact";
+
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+
+interface RandomFactProps {
+    show?: boolean
+    loading: boolean
+}
+const RandomFact: FC<RandomFactProps> = ({children, loading = false, show= true}) => {
+    return show ? (<>
+        <h1>Random Fact</h1>
+        <span>
+            {loading && '...Loading'}
+            {!loading && children}
+        </span>
+    </>) : <></>
+}
+
+const App: FC = () => {
+    const [completed, setCompleted] = useState(false)
+    const { data, loading, fetch } = useFetchRandomFact()
+
+    const onComplete = useCallback((completed) => {
+        setCompleted(completed)
+        if (completed)
+            fetch()
+    }, [fetch])
+
+    return (
+      <CenteredContainer>
+          <StartupProgress onCompleted={onComplete}/>
+          <RandomFact show={completed} loading={loading} >
+              {data ? data.text : "Error"}
+          </RandomFact>
+      </CenteredContainer>
   );
 }
 
